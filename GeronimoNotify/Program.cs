@@ -169,7 +169,9 @@ public class IzletEq : IEqualityComparer<Izlet>
         return x.id == y.id
             && x.starttime == y.starttime
             && x.endtime == y.endtime
-            && x.limitation == y.limitation;
+            && x.limitation == y.limitation
+            //ako se broj registriranih smanjio
+            && Convert.ToInt32(x.registered) <= Convert.ToInt32(y.registered);
     }
 
     public int GetHashCode([DisallowNull] Izlet obj)
