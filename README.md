@@ -1,5 +1,5 @@
 ﻿## What is it?
-Dohvaća popis novih izleta sa geronimo stranice, uspoređuje sa prethodno dohvaćenim popisom i šalje post request na upisne adrese
+Dohvaća popis aktualnih izleta sa geronimo stranice, uspoređuje sa prethodno dohvaćenim popisom i šalje post request na upisane adrese
 
 ## Postavljanje: 
 u appsettings.json upisati geronimo username, app password (potrebno generirati u postavkama profila na stranici) i adrese gdje se šalje post request
