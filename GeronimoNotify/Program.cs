@@ -46,7 +46,7 @@ namespace GeronimoNotify
                 foreach (var izlet in diff)
                 {
                     //za svaki novi izlet, složi poruku i probaj poslati msg
-                    var msg = $"Izlet {izlet.display_name}, od {izlet.starttime} do {izlet.endtime}, mjesta {izlet.preostalo}, link: {izlet.link}";
+                    var msg = $"{izlet.post_title} ({izlet.display_name}), od {izlet.starttime} do {izlet.endtime}, mjesta {izlet.preostalo}, link: {izlet.link}";
 
                     await TrySendMessage(msg, addresses);
                 }
