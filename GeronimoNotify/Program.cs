@@ -41,7 +41,7 @@ namespace GeronimoNotify
                 List<Izlet> izleti = GetIzletiFromContent(content);
 
                 //nađi diff gdje su novi, te usporedba s custom da se i promjene prate
-                var diff = izleti.Except(stariIzleti, new IzletEq());                
+                var diff = izleti.Except(stariIzleti, new IzletEq()).ToList();                
 
                 foreach (var izlet in diff)
                 {
@@ -159,19 +159,21 @@ public class Izlet
 
 public class IzletEq : IEqualityComparer<Izlet>
 {
-    public bool Equals(Izlet? x, Izlet? y)
+    public bool Equals(Izlet? stari, Izlet? novi)
     {
-        if (x == null && y == null)
+        if (stari == null && novi == null)
             return true;
-        if (x == null || y == null)
+        if (stari == null || novi == null)
             return false;
 
-        return x.id == y.id
-            && x.starttime == y.starttime
-            && x.endtime == y.endtime
-            && x.limitation == y.limitation
-            //ako se broj registriranih smanjio
-            && Convert.ToInt32(x.registered) <= Convert.ToInt32(y.registered);
+        return novi.id == stari.id            
+            &&
+            (
+                //ako se broj preostalih mjesta smanjuje ili je jednak
+                novi.preostalo <= stari.preostalo
+                //ili prethodno je bilo još mjesta
+                || stari.preostalo != 0
+            );
     }
 
     public int GetHashCode([DisallowNull] Izlet obj)
