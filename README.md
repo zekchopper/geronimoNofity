@@ -1,4 +1,6 @@
-﻿## What is it?
+[![.NET Core Desktop](https://github.com/zekchopper/geronimoNofity/actions/workflows/dotnet-desktop.yml/badge.svg)](https://github.com/zekchopper/geronimoNofity/actions/workflows/dotnet-desktop.yml)
+ 
+ ## What is it?
 Dohvaća popis aktualnih izleta sa geronimo stranice, uspoređuje sa prethodno dohvaćenim popisom i šalje post request na upisane adrese
 
 ## Postavljanje: 
