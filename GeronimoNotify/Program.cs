@@ -10,14 +10,17 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace GeronimoNotify
 {
     internal class Program
     {
+        private static string telegramApiToken;
+        private static string[] addresses;
+        private static string[] telegramChatIds;
         static async Task Main(string[] args)
         {
-
             var builder = new ConfigurationBuilder();
             builder.SetBasePath(Directory.GetCurrentDirectory())
                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -25,7 +28,9 @@ namespace GeronimoNotify
             IConfiguration config = builder.Build();
             string username = config["Credentials:Username"];
             string password = config["Credentials:Password"];
-            var addresses = config.GetSection("Addresses").GetChildren().Select(x => x.Value).ToArray();
+            telegramApiToken = config["Credentials:TelegramApiToken"];
+            addresses = config.GetSection("Addresses").GetChildren().Select(x => x.Value).ToArray();
+            telegramChatIds = config.GetSection("TelegramChatIds").GetChildren().Select(x => x.Value).ToArray();     
 
             var client = new HttpClient();
 
@@ -41,22 +46,21 @@ namespace GeronimoNotify
                 List<Izlet> izleti = GetIzletiFromContent(content);
 
                 //nađi diff gdje su novi, te usporedba s custom da se i promjene prate
-                var diff = izleti.Except(stariIzleti, new IzletEq()).ToList();                
+                var diff = izleti.Except(stariIzleti, new IzletEq()).ToList();
 
                 foreach (var izlet in diff)
                 {
                     //za svaki novi izlet, složi poruku i probaj poslati msg
                     var msg = $"{izlet.post_title} ({izlet.display_name}), od {izlet.starttime} do {izlet.endtime}, mjesta {izlet.preostalo}, link: {izlet.link}";
 
-                    await TrySendMessage(msg, addresses);
+                    await TrySendMessage(msg);
                 }
-
 
                 File.WriteAllText("izleti.json", JsonSerializer.Serialize(izleti));
             }
             catch (Exception ex)
             {
-                await TrySendMessage(ex.Message, addresses);
+                await TrySendMessage(ex.Message);
             }
         }
 
@@ -111,20 +115,29 @@ namespace GeronimoNotify
         /// </summary>
         /// <param name="msg"></param>
         /// <returns></returns>
-        private static async Task TrySendMessage(string msg, string[] addresses)
-        {
+        private static async Task TrySendMessage(string msg)
+        {                      
             try
             {
                 foreach (var adr in addresses)
                 {                    
-                    await ntfyClient.PostAsync(adr, new StringContent(msg));
-                }                
+                   await ntfyClient.PostAsync(adr, new StringContent(msg));
+                }
+                foreach (var chatId in telegramChatIds)
+                {
+                    //za telegram, dovoljan je ovakav get request
+                    string urlString = $"https://api.telegram.org/bot{telegramApiToken}/sendMessage?chat_id={chatId}";
+                    urlString = QueryHelpers.AddQueryString(urlString, "text", msg);
+                    
+                    await ntfyClient.GetAsync(urlString);
+                }
             }
             catch (Exception ex) 
             {
                 File.AppendAllText("error.txt", ex.Message);                
             }
         }
+
     }
     
 }
